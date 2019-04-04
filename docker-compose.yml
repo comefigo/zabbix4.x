@@ -1,0 +1,39 @@
+version: "3.7"
+services:
+  zbx-server:
+    image: zabbix/zabbix-server-pgsql:alpine-4.2-latest
+    container_name: zbx-server
+    env_file:
+      - envs/common.env
+      - envs/zbx-server.env
+      - envs/zbx-db.env
+    depends_on:
+      - zbx-db
+  zbx-web:
+    image: zabbix/zabbix-web-nginx-pgsql:alpine-4.2-latest
+    container_name: zbx-web
+    env_file:
+      - envs/common.env
+      - envs/zbx-server.env
+      - envs/zbx-db.env
+      - envs/zbx-web.env
+    ports:
+      - 80:80
+    depends_on:
+      - zbx-server
+  zbx-db:
+    image: postgres:11
+    container_name: zbx-db
+    env_file:
+      - envs/common.env
+      - envs/zbx-db.env
+
+  zbx-agent:
+    image: zabbix/zabbix-agent:alpine-4.2-latest
+    container_name: zbx-agent
+    env_file:
+      - envs/common.env
+      - envs/zbx-agent.env
+    depends_on:
+      - zbx-server
+    privileged: true
